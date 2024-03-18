@@ -1,8 +1,9 @@
 import { prismaClient } from "../app/database";
 import { ResponseErorr } from "../error/reponse-error";
-import { LoginRequest, RegisterRequest, UserResponse, toUserResponse } from "../model/user-model";
+import { LoginRequest, RegisterRequest, UserLoginResponse, UserResponse, toUserLoginResponse, toUserResponse } from "../model/user-model";
 import { UserValidation } from "../validation/user-validation";
 import { Validation } from "../validation/validation";
+import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 
 export class UserService {
@@ -28,7 +29,7 @@ export class UserService {
         return toUserResponse(user)
     }
 
-    static async login(req: LoginRequest): Promise<UserResponse> {
+    static async login(req: LoginRequest): Promise<UserLoginResponse> {
         const loginRequest = Validation.validate(UserValidation.LOGIN, req)
 
         const user = await prismaClient.user.findUnique({
@@ -43,10 +44,19 @@ export class UserService {
 
         const isPasswordValid = await bcrypt.compare(loginRequest.password, user.password)
 
-        if(!isPasswordValid){
+        if (!isPasswordValid) {
             throw new ResponseErorr(401, "Email or password is invalid")
         }
 
-        return toUserResponse(user)
+        const payload = {
+            username: user.username,
+            email: user.email,
+            name: user.name,
+        }
+        const secretKey = process.env.SECRET_KEY!
+        const expiresIn = 60
+        const token = jwt.sign(payload, secretKey, {expiresIn: expiresIn})
+
+        return toUserLoginResponse(user, token)
     }
 }
