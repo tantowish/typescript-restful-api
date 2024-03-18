@@ -1,22 +1,22 @@
 import { prismaClient } from "../app/database";
 import { ResponseErorr } from "../error/reponse-error";
-import { CreateUserRequest, UserResponse, toUserResponse } from "../model/user-model";
+import { LoginRequest, RegisterRequest, UserResponse, toUserResponse } from "../model/user-model";
 import { UserValidation } from "../validation/user-validation";
 import { Validation } from "../validation/validation";
 import bcrypt from 'bcrypt'
 
 export class UserService {
-    static async register(req: CreateUserRequest): Promise<UserResponse> {
-        const registerRequest = Validation.validate(UserValidation.Register, req)
+    static async register(req: RegisterRequest): Promise<UserResponse> {
+        const registerRequest = Validation.validate(UserValidation.REGISTER, req)
 
-        const duplicateUsername = await prismaClient.user.findMany({
-            where:{
-                username: registerRequest.username
+        const duplicateEmail = await prismaClient.user.findMany({
+            where: {
+                email: registerRequest.email
             }
         })
 
-        if(duplicateUsername.length>0){
-            throw new ResponseErorr(400, "Username has already taken")
+        if (duplicateEmail.length > 0) {
+            throw new ResponseErorr(400, "Email has already taken")
         }
 
         registerRequest.password = await bcrypt.hash(registerRequest.password, 10)
@@ -24,6 +24,28 @@ export class UserService {
         const user = await prismaClient.user.create({
             data: registerRequest
         })
+
+        return toUserResponse(user)
+    }
+
+    static async login(req: LoginRequest): Promise<UserResponse> {
+        const loginRequest = Validation.validate(UserValidation.LOGIN, req)
+
+        const user = await prismaClient.user.findUnique({
+            where: {
+                email: loginRequest.email
+            }
+        })
+
+        if (!user) {
+            throw new ResponseErorr(404, "User not found")
+        }
+
+        const isPasswordValid = await bcrypt.compare(loginRequest.password, user.password)
+
+        if(!isPasswordValid){
+            throw new ResponseErorr(401, "Email or password is invalid")
+        }
 
         return toUserResponse(user)
     }
