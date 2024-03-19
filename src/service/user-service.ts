@@ -1,6 +1,6 @@
 import { prismaClient } from "../app/database";
 import { ResponseErorr } from "../error/reponse-error";
-import { LoginRequest, RegisterRequest, UserLoginResponse, UserResponse, toUserLoginResponse, toUserResponse } from "../model/user-model";
+import { LoginRequest, RegisterRequest, UpdateRequest, LoginResponse, UserResponse, toUserLoginResponse, toUserResponse } from "../model/user-model";
 import { UserValidation } from "../validation/user-validation";
 import { Validation } from "../validation/validation";
 import jwt from 'jsonwebtoken'
@@ -9,6 +9,19 @@ import { UserRequest } from "../types/user-request";
 import { User } from "@prisma/client";
 
 export class UserService {
+    static async checkUserExist(user: User) {
+        const checkUserExist = await prismaClient.user.findUnique({
+            where: {
+                email: user.email,
+                username: user.username
+            }
+        })
+
+        if (!checkUserExist) {
+            throw new ResponseErorr(404, "User not found")
+        }
+    }
+
     static async register(req: RegisterRequest): Promise<UserResponse> {
         const registerRequest = Validation.validate(UserValidation.REGISTER, req)
 
@@ -31,12 +44,12 @@ export class UserService {
         return toUserResponse(user)
     }
 
-    static async login(req: LoginRequest): Promise<UserLoginResponse> {
+    static async login(req: LoginRequest): Promise<LoginResponse> {
         const loginRequest = Validation.validate(UserValidation.LOGIN, req)
 
         const user = await prismaClient.user.findUnique({
             where: {
-                email: loginRequest.email
+                email: loginRequest.email,
             }
         })
 
@@ -57,7 +70,7 @@ export class UserService {
         }
         const secretKey = process.env.SECRET_KEY!
         const expiresIn = 60
-        const token = jwt.sign(payload, secretKey, {expiresIn: expiresIn})
+        const token = jwt.sign(payload, secretKey, { expiresIn: expiresIn })
 
         return toUserLoginResponse(user, token)
     }
@@ -66,5 +79,30 @@ export class UserService {
         return toUserResponse(user)
     }
 
+    static async update(user: User, req: UpdateRequest): Promise<UserResponse> {
+        const updateRequest = Validation.validate(UserValidation.UPDATE, req)
 
+        await this.checkUserExist(user)
+
+        if (updateRequest.name) {
+            user.name = updateRequest.name
+        }
+
+        if (updateRequest.password) {
+            user.password = await bcrypt.hash(updateRequest.password, 10)
+        }
+
+        const userUpdate = await prismaClient.user.update({
+            where: {
+                username: user.username,
+                email: user.email
+            },
+            data: {
+                username: user.name,
+                password: user.password
+            }
+        })
+
+        return toUserResponse(userUpdate)
+    }
 }

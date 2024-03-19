@@ -6,7 +6,7 @@ export type UserResponse = {
     email: string
 }
 
-export type UserLoginResponse = {
+export type LoginResponse = {
     data: UserResponse,
     token: string
 }
@@ -16,6 +16,11 @@ export type RegisterRequest = {
     name: string
     password: string
     email: string
+}
+
+export type UpdateRequest = {
+    name?: string,
+    password?: string
 }
 
 export type LoginRequest = {
@@ -31,7 +36,7 @@ export function toUserResponse(user: User): UserResponse {
     }
 }
 
-export function toUserLoginResponse(user: User, token: string): UserLoginResponse {
+export function toUserLoginResponse(user: User, token: string): LoginResponse {
     return {
         data: {
             username: user.username,

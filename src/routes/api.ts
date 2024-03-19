@@ -7,4 +7,5 @@ export const apiRouter = express.Router()
 
 apiRouter.use(authMiddleware)
 
-apiRouter.get('/api/user', UserController.get)
+apiRouter.get('/api/users', UserController.get)
+apiRouter.patch('/api/users', UserController.update)
