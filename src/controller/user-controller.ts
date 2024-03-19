@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { LoginRequest, RegisterRequest } from "../model/user-model";
 import { UserService } from "../service/user-service";
+import { UserRequest } from "../types/user-request";
+import { User } from "@prisma/client";
 
 export class UserController {
     static async register(req: Request, res: Response, next: NextFunction) {
@@ -15,11 +17,20 @@ export class UserController {
         }
     }
 
-    static async login(req: Request, res: Response, next: NextFunction){
+    static async login(req: Request, res: Response, next: NextFunction) {
         try {
             const request: LoginRequest = req.body as LoginRequest
             const response = await UserService.login(request)
 
+            res.status(200).json(response)
+        } catch (e) {
+            next(e)
+        }
+    }
+
+    static async get(req: UserRequest, res: Response, next: NextFunction) {
+        try {
+            const response = await UserService.get(req.user as User)
             res.status(200).json({
                 data: response
             })

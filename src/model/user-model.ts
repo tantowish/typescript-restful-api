@@ -7,9 +7,7 @@ export type UserResponse = {
 }
 
 export type UserLoginResponse = {
-    username: string,
-    name: string,
-    email: string,
+    data: UserResponse,
     token: string
 }
 
@@ -35,9 +33,11 @@ export function toUserResponse(user: User): UserResponse {
 
 export function toUserLoginResponse(user: User, token: string): UserLoginResponse {
     return {
-        username: user.username,
-        name: user.name,
-        email: user.email,
+        data: {
+            username: user.username,
+            name: user.name,
+            email: user.email,
+        },
         token: token
     }
 }

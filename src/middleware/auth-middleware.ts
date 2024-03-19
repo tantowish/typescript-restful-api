@@ -8,7 +8,10 @@ export const authMiddleware = async (req: UserRequest, res: Response, next: Next
     const { authorization } = req.headers
 
     if (!authorization) {
-        throw new ResponseErorr(401, "Token is required")
+        res.status(401).json({
+            error: "Token is required"
+        }).end()
+        return
     }
 
     const token = authorization.split(' ')[1];
@@ -21,7 +24,11 @@ export const authMiddleware = async (req: UserRequest, res: Response, next: Next
             req.user = jwtDecode as UserResponse
         }
     } catch (error) {
-        throw new ResponseErorr(401, "Unauthorized")
+        res.status(401).json({
+            error: "Unauthorized"
+        }).end()
+        return
     }
     next()
+    return
 }

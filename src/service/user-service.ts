@@ -5,6 +5,8 @@ import { UserValidation } from "../validation/user-validation";
 import { Validation } from "../validation/validation";
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
+import { UserRequest } from "../types/user-request";
+import { User } from "@prisma/client";
 
 export class UserService {
     static async register(req: RegisterRequest): Promise<UserResponse> {
@@ -59,4 +61,10 @@ export class UserService {
 
         return toUserLoginResponse(user, token)
     }
+
+    static async get(user: User): Promise<UserResponse> {
+        return toUserResponse(user)
+    }
+
+
 }
