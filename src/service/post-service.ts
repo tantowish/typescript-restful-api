@@ -4,6 +4,7 @@ import { Validation } from "../validation/validation";
 import { PostValidation } from "../validation/post-validation";
 import { prismaClient } from "../app/database";
 import { ResponseErorr } from "../error/reponse-error";
+import { UserService } from "./user-service";
 
 export class PostService {
     static async checkPostExist(id: string, user: User){
@@ -34,6 +35,18 @@ export class PostService {
 
     static async getAll(): Promise<PostResponse[]> {
         const posts = await prismaClient.post.findMany()
+
+        return toPostResponseArray(posts)
+    }
+
+    static async getPostByUser(username: string): Promise<PostResponse[]>{
+        await UserService.checkUserExist(username)
+
+        const posts = await prismaClient.post.findMany({
+            where:{
+                author: username
+            }
+        })
 
         return toPostResponseArray(posts)
     }

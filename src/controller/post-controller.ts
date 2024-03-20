@@ -28,6 +28,17 @@ export class PostController {
         }
     }
 
+    static async getPostByUser(req: Request, res: Response, next: NextFunction){
+        try {
+            const response = await PostService.getPostByUser(req.params.username)
+            res.status(200).json({
+                data: response
+            })
+        } catch(e) {
+            next(e)
+        }
+    }
+
     static async get(req: Request, res: Response, next: NextFunction) {
         try {
             const response = await PostService.get(req.params.id)

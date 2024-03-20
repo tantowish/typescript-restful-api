@@ -11,3 +11,4 @@ publicRouter.post('/api/users/login', UserController.login)
 // Post API
 publicRouter.get('/api/posts', PostController.getAll)
 publicRouter.get('/api/posts/:id', PostController.get)
+publicRouter.get('/api/users/:username/posts', PostController.getPostByUser)  

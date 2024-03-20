@@ -8,11 +8,10 @@ import bcrypt from 'bcrypt'
 import { User } from "@prisma/client";
 
 export class UserService {
-    static async checkUserExist(user: User) {
+    static async checkUserExist(username: string) {
         const checkUserExist = await prismaClient.user.findUnique({
             where: {
-                email: user.email,
-                username: user.username
+                username: username
             }
         })
 
@@ -81,7 +80,7 @@ export class UserService {
     static async update(user: User, req: UpdateUserRequest): Promise<UserResponse> {
         const updateRequest = Validation.validate(UserValidation.UPDATE, req)
 
-        await this.checkUserExist(user)
+        await this.checkUserExist(user.username)
 
         if (updateRequest.name) {
             user.name = updateRequest.name
