@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { LoginRequest, RegisterRequest, UpdateRequest } from "../model/user-model";
+import { LoginRequest, RegisterRequest, UpdateUserRequest } from "../model/user-model";
 import { UserService } from "../service/user-service";
 import { UserRequest } from "../types/user-request";
 import { User } from "@prisma/client";
@@ -41,7 +41,7 @@ export class UserController {
 
     static async update(req: UserRequest, res: Response, next: NextFunction) {
         try {
-            const request: UpdateRequest = req.body as UpdateRequest
+            const request: UpdateUserRequest = req.body as UpdateUserRequest
             const response = await UserService.update(req.user as User, request)
             res.status(200).json({
                 data: response

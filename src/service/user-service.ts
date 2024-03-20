@@ -1,11 +1,10 @@
 import { prismaClient } from "../app/database";
 import { ResponseErorr } from "../error/reponse-error";
-import { LoginRequest, RegisterRequest, UpdateRequest, LoginResponse, UserResponse, toUserLoginResponse, toUserResponse } from "../model/user-model";
+import { LoginRequest, RegisterRequest, UpdateUserRequest, LoginResponse, UserResponse, toUserLoginResponse, toUserResponse } from "../model/user-model";
 import { UserValidation } from "../validation/user-validation";
 import { Validation } from "../validation/validation";
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
-import { UserRequest } from "../types/user-request";
 import { User } from "@prisma/client";
 
 export class UserService {
@@ -69,7 +68,7 @@ export class UserService {
             name: user.name,
         }
         const secretKey = process.env.SECRET_KEY!
-        const expiresIn = 60
+        const expiresIn = 60 * 60
         const token = jwt.sign(payload, secretKey, { expiresIn: expiresIn })
 
         return toUserLoginResponse(user, token)
@@ -79,7 +78,7 @@ export class UserService {
         return toUserResponse(user)
     }
 
-    static async update(user: User, req: UpdateRequest): Promise<UserResponse> {
+    static async update(user: User, req: UpdateUserRequest): Promise<UserResponse> {
         const updateRequest = Validation.validate(UserValidation.UPDATE, req)
 
         await this.checkUserExist(user)

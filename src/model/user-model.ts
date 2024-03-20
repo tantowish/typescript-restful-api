@@ -18,7 +18,7 @@ export type RegisterRequest = {
     email: string
 }
 
-export type UpdateRequest = {
+export type UpdateUserRequest = {
     name?: string,
     password?: string
 }
